@@ -57,7 +57,7 @@ const Booking = () => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (selectedServices.length === 0) {
       toast.error("Please select at least one service");
       return;
@@ -68,40 +68,85 @@ const Booking = () => {
       return;
     }
 
-    const bookingData = {
-      id: `bk_${Date.now()}`,
-      services: selectedServices.map(s => ({ name: s.name, price: s.price })),
-      totalAmount,
-      ...formData,
-      createdAt: new Date().toISOString(),
-    };
+    if (!formData.name.trim()) {
+      toast.error("Please enter your name");
+      return;
+    }
 
-    // Save to localStorage
-    const existingBookings = JSON.parse(
-      localStorage.getItem("sharmoria_bookings") || "[]"
-    );
-    existingBookings.push(bookingData);
-    localStorage.setItem(
-      "sharmoria_bookings",
-      JSON.stringify(existingBookings)
-    );
+    if (!formData.email.trim() || !formData.email.includes('@')) {
+      toast.error("Please enter a valid email address");
+      return;
+    }
 
-    toast.success(
-      "Booking received! We will contact you to confirm. Thank you!"
-    );
+    if (!formData.phone.trim()) {
+      toast.error("Please enter your phone number");
+      return;
+    }
 
-    // Reset form
-    setSelectedServices([]);
-    setFormData({
-      date: "",
-      time: "",
-      name: "",
-      email: "",
-      phone: "",
-      address: "",
-      idDocument: null,
-      paymentMethod: "cash",
-    });
+    if (!formData.address.trim()) {
+      toast.error("Please enter your service address");
+      return;
+    }
+
+    if (!formData.date) {
+      toast.error("Please select a date");
+      return;
+    }
+
+    if (!formData.time) {
+      toast.error("Please select a time");
+      return;
+    }
+
+    if (!formData.idDocument) {
+      toast.error("Please upload your ID/Passport document");
+      return;
+    }
+
+    try {
+      const bookingData = {
+        id: `bk_${Date.now()}`,
+        services: selectedServices.map(s => ({ name: s.name, price: s.price })),
+        totalAmount,
+        date: formData.date,
+        time: formData.time,
+        name: formData.name,
+        email: formData.email,
+        phone: formData.phone,
+        address: formData.address,
+        paymentMethod: formData.paymentMethod,
+        idDocumentName: formData.idDocument.name,
+        createdAt: new Date().toISOString(),
+      };
+
+      const existingBookings = JSON.parse(
+        localStorage.getItem("sharmoria_bookings") || "[]"
+      );
+      existingBookings.push(bookingData);
+      localStorage.setItem(
+        "sharmoria_bookings",
+        JSON.stringify(existingBookings)
+      );
+
+      toast.success(
+        "Booking received! We will contact you to confirm. Thank you!"
+      );
+
+      setSelectedServices([]);
+      setFormData({
+        date: "",
+        time: "",
+        name: "",
+        email: "",
+        phone: "",
+        address: "",
+        idDocument: null,
+        paymentMethod: "cash",
+      });
+    } catch (error) {
+      console.error('Error saving booking:', error);
+      toast.error("Failed to save booking. Please try again.");
+    }
   };
 
   const handleChange = (field: string, value: string | File | null) => {

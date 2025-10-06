@@ -6,11 +6,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
-import { useAuth } from "@/contexts/AuthContext";
 
 const Signup = () => {
   const navigate = useNavigate();
-  const { signUp } = useAuth();
   const [formData, setFormData] = useState({
     fullName: "",
     email: "",
@@ -35,18 +33,26 @@ const Signup = () => {
 
     setIsLoading(true);
 
-    const { error } = await signUp(
-      formData.email,
-      formData.password,
-      formData.fullName,
-      formData.phone
-    );
+    const users = JSON.parse(localStorage.getItem("sharmoria_users") || "[]");
 
-    if (error) {
-      toast.error(error.message || "Failed to create account");
+    const existingUser = users.find((u: any) => u.email === formData.email);
+    if (existingUser) {
+      toast.error("User with this email already exists");
       setIsLoading(false);
       return;
     }
+
+    const newUser = {
+      id: `user_${Date.now()}`,
+      fullName: formData.fullName,
+      email: formData.email,
+      phone: formData.phone,
+      password: formData.password,
+      createdAt: new Date().toISOString(),
+    };
+
+    users.push(newUser);
+    localStorage.setItem("sharmoria_users", JSON.stringify(users));
 
     toast.success("Account created successfully! You can now sign in.");
     navigate("/login");

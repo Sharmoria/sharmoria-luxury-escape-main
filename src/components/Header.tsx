@@ -1,19 +1,26 @@
 import { Link, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Menu, X, User, LogOut } from "lucide-react";
-import { useState } from "react";
-import { useAuth } from "@/contexts/AuthContext";
+import { useState, useEffect } from "react";
 import logo from "@/assets/logo.png";
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [user, setUser] = useState<any>(null);
   const location = useLocation();
-  const { user, signOut } = useAuth();
+
+  useEffect(() => {
+    const currentUser = localStorage.getItem("sharmoria_current_user");
+    if (currentUser) {
+      setUser(JSON.parse(currentUser));
+    }
+  }, [location]);
 
   const isActive = (path: string) => location.pathname === path;
 
-  const handleSignOut = async () => {
-    await signOut();
+  const handleSignOut = () => {
+    localStorage.removeItem("sharmoria_current_user");
+    setUser(null);
     setIsMenuOpen(false);
   };
 

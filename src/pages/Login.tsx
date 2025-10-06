@@ -6,11 +6,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
-import { useAuth } from "@/contexts/AuthContext";
 
 const Login = () => {
   const navigate = useNavigate();
-  const { signIn } = useAuth();
   const [formData, setFormData] = useState({
     email: "",
     password: "",
@@ -21,14 +19,18 @@ const Login = () => {
     e.preventDefault();
     setIsLoading(true);
 
-    const { error } = await signIn(formData.email, formData.password);
+    const users = JSON.parse(localStorage.getItem("sharmoria_users") || "[]");
+    const user = users.find(
+      (u: any) => u.email === formData.email && u.password === formData.password
+    );
 
-    if (error) {
-      toast.error(error.message || "Failed to sign in");
+    if (!user) {
+      toast.error("Invalid email or password");
       setIsLoading(false);
       return;
     }
 
+    localStorage.setItem("sharmoria_current_user", JSON.stringify(user));
     toast.success("Successfully signed in!");
     navigate("/booking");
   };
